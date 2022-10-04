@@ -52,7 +52,7 @@ dataBase.report.push({
 
 interface Data {
   report: {
-    id: any;
+    id: string;
     source: string;
     amount: number;
     created_at: Date;

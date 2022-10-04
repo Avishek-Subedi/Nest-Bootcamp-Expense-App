@@ -1,8 +1,7 @@
-import { Body, Controller, Get, Param, Post } from '@nestjs/common';
+import { Body, Controller, Get, HttpCode, Param, Post } from '@nestjs/common';
 import { Delete, Put } from '@nestjs/common/decorators';
-import { v4 as uuid4 } from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 import { dataBase, ReportType } from './data';
-import { randomUUID } from 'crypto';
 import { NotFoundError } from 'rxjs';
 
 @Controller('/report/:type')
@@ -37,7 +36,7 @@ export class AppController {
     @Param('type') type: string,
   ) {
     const newReport = {
-      id: uuid4(),
+      id: uuidv4(),
       source: source,
       amount: amount,
       created_at: new Date(),
@@ -76,8 +75,16 @@ export class AppController {
 
     //
   }
+
+  @HttpCode(204)
   @Delete(':id')
-  deleteReport() {
-    return 'deleted';
+  deleteReport(@Param('id') id: string) {
+    const reportIndex = dataBase.report.findIndex((report) => report.id === id);
+
+    if (reportIndex === -1) {
+      throw NotFoundError;
+    }
+    dataBase.report.splice(reportIndex, 1);
+    return;
   }
 }
