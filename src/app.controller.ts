@@ -3,6 +3,7 @@ import { Delete, Put } from '@nestjs/common/decorators';
 import { v4 as uuid4 } from 'uuid';
 import { dataBase, ReportType } from './data';
 import { randomUUID } from 'crypto';
+import { NotFoundError } from 'rxjs';
 
 @Controller('/report/:type')
 export class AppController {
@@ -48,8 +49,32 @@ export class AppController {
   }
 
   @Put(':id')
-  updateReport() {
-    return 'updated';
+  updateReport(
+    @Param('type') type: string,
+    @Param('id') id: string,
+    @Body() body: { amount: number; source: string },
+  ) {
+    const reportType =
+      type == 'income' ? ReportType.INCOME : ReportType.EXPENSE;
+
+    const reportToUpdate = dataBase.report
+      .filter((report) => report.type == reportType)
+      .find((report) => report.id);
+
+    if (!reportToUpdate) {
+      throw NotFoundError;
+    }
+    const reportIndex = dataBase.report.findIndex(
+      (report) => report.id === reportToUpdate.id,
+    );
+    dataBase.report[reportIndex] = {
+      ...dataBase.report[reportIndex],
+      ...body,
+    };
+
+    return dataBase.report[reportIndex];
+
+    //
   }
   @Delete(':id')
   deleteReport() {
