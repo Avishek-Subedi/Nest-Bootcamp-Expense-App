@@ -1,3 +1,4 @@
+import { v4 } from 'uuid';
 export enum ReportType {
   INCOME = 'income',
   EXPENSE = 'expense',
@@ -51,7 +52,7 @@ dataBase.report.push({
 
 interface Data {
   report: {
-    id: string;
+    id: any;
     source: string;
     amount: number;
     created_at: Date;
