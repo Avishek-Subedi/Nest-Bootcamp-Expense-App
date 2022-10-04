@@ -3,6 +3,7 @@ import { ReportType, dataBase } from './data';
 import { Injectable, Body } from '@nestjs/common';
 import { v4 as uuidv4 } from 'uuid';
 import { NotFoundError } from 'rxjs';
+import { ReportResponseDto } from './dtos/report.dto';
 
 interface Report {
   amount: number;
@@ -16,18 +17,25 @@ interface UpdateReport {
 
 @Injectable()
 export class AppService {
-  getAllReports(type: ReportType) {
-    return dataBase.report.filter((report) => report.type === type);
+  getAllReports(type: ReportType): ReportResponseDto[] {
+    return dataBase.report
+      .filter((report) => report.type === type)
+      .map((report) => new ReportResponseDto(report));
   }
 
-  getReportById(type: ReportType, id: string) {
-    return dataBase.report
+  getReportById(type: ReportType, id: string): ReportResponseDto {
+    const report = dataBase.report
       .filter((report) => report.type == type)
       .find((report) => report.id);
-    console.log(type, id);
+
+    if (!report) return;
+    return new ReportResponseDto(report);
   }
 
-  createReport(type: ReportType, { amount, source }: Report) {
+  createReport(
+    type: ReportType,
+    { amount, source }: Report,
+  ): ReportResponseDto {
     const newReport = {
       id: uuidv4(),
       source: source,
@@ -37,10 +45,14 @@ export class AppService {
       type: type,
     };
     dataBase.report.push(newReport);
-    return newReport;
+    return new ReportResponseDto(newReport);
   }
 
-  updateReport(type: ReportType, id: string, body: UpdateReport) {
+  updateReport(
+    type: ReportType,
+    id: string,
+    body: UpdateReport,
+  ): ReportResponseDto {
     const reportToUpdate = dataBase.report
       .filter((report) => report.type == type)
       .find((report) => report.id);
@@ -56,8 +68,7 @@ export class AppService {
       ...body,
       updated_at: new Date(),
     };
-
-    return dataBase.report[reportIndex];
+    return new ReportResponseDto(dataBase.report[reportIndex]);
   }
 
   deleteReport(id: string) {
