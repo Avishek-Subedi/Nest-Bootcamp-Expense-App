@@ -9,9 +9,7 @@ export class AppController {
     const reportType =
       type == 'income' ? ReportType.INCOME : ReportType.EXPENSE;
     return dataBase.report.filter((report) => {
-      if (type === 'income') {
-        return report.type == reportType;
-      }
+      return report.type == reportType;
     });
     return [];
   }
@@ -19,8 +17,14 @@ export class AppController {
   //get by id
 
   @Get(':id')
-  getReportById() {
-    return {};
+  getReportById(@Param('type') type: string, @Param('id') id: string) {
+    const reportType =
+      type == 'income' ? ReportType.INCOME : ReportType.EXPENSE;
+
+    return dataBase.report
+      .filter((report) => report.type == reportType)
+      .find((report) => report.id);
+    console.log(type, id);
   }
 
   @Post()
